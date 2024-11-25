@@ -2,6 +2,7 @@ const User=require("../../model/Usermodel")
 const bcrypt=require("bcryptjs")
 const jwt=require("jsonwebtoken")
 const sendMail = require("./Services/sendMail")
+const generateOtp = require("./Services/genereteOtp")
 
 exports.registeruser=async(req,res)=>{
     try{
@@ -83,18 +84,70 @@ catch(error){
 
   }
   exports.forgetPassword =async(req,res)=>{
-    const{email}=req.body
-    if(!email){
-      res.status(400).json({
-        message:"provude email"
-      })
-      return
-    }
-    var otp =1234
-     await sendMail(email,otp)
-    res.status(200).json({
-message:"OTP sent sucessfully"
+
+try{
+  const{email}=req.body
+
+  let data= await User.find ({email:email})
+  if (data.length===0){
+    return res.status(404).json({
+      message:"no user registered with that email"
     })
   }
 
+  if(!email){
+    res.status(400).json({
+      message:"provide email"
+    })
+    return
+  }
+  var otp =generateOtp()
+
+  data[0].otp=otp
+  await data[0].save()
+
+   await sendMail(email,otp)
+  res.status(200).json({
+message:"OTP sent sucessfully"
+  })
+}
+catch(error){
+  res.status(500).json({
+    message:"Error",
+    errMessage:error.message
+  })
+ }
+  }
+
+  exports.resetPassword=async(req,res)=>{
+   try{
+    const{otp,newPassword}=req.body
+    if(!otp||!newPassword){
+     return res.status(400).json({
+        message:"please provide otp,newPassword"
+      })
+    }
   
+  //otp verify whether yo otp xa ki xaina
+  const [data]=await User.find({otp:otp})  // destructing data pailaarray thyo aila object
+  if(!data){
+    return res.status(404).json({
+      message:"invalid otp"
+    })
+  }
+  data.password=bcrypt.hashSync(newPassword,10)
+  await data.save()
+  res.status(200).json
+({
+  message:"password reset sucessfullyr"
+})
+   }
+catch(error){
+  res.status(500).json({
+    message:"Error",
+    errMessage:error.message
+  })
+ }
+
+   
+  }

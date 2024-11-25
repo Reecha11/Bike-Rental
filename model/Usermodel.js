@@ -13,6 +13,9 @@ const userSchema =new Schema({
     password:{
         type:String,
         required:true  
+    },
+    otp:{
+        type:Number
     }
 })
 const User = mongoose.model("User",userSchema)   //table banako user vanney ani column (userSchema) sanga connect garako
