@@ -1,8 +1,8 @@
 const User=require("../../model/Usermodel")
 const bcrypt=require("bcryptjs")
 const jwt=require("jsonwebtoken")
-const sendMail = require("./Services/sendMail")
-const generateOtp = require("./Services/genereteOtp")
+const sendMail = require("../../Services/sendMail")
+const generateOtp = require("../../Services/genereteOtp")
 
 exports.registeruser=async(req,res)=>{
     try{
@@ -86,35 +86,47 @@ catch(error){
   exports.forgetPassword =async(req,res)=>{
 
 try{
+
+  // Step 1: Extract the email from the request body
   const{email}=req.body
 
+  // Step 2: Query the database to find a user with the provided email
   let data= await User.find ({email:email})
+
+  // Step 3: Check if no user exists with the given email
   if (data.length===0){
     return res.status(404).json({
       message:"no user registered with that email"
     })
   }
 
+  // Step 4: Check if the email was not provided in the request
   if(!email){
     res.status(400).json({
       message:"provide email"
     })
-    return
+    return   // Exit the function 
   }
+
+  // Step 5: Generate a one-time password (OTP)
   var otp =generateOtp()
+  data[0].otp=otp         // Assign the OTP to the user's `otp` field
+  await data[0].save()    // Save the updated record to the database
 
-  data[0].otp=otp
-  await data[0].save()
+  // Step 7: Send the OTP to the user's email
+   await sendMail(email,otp)    // Send the OTP via the `sendMail` function
 
-   await sendMail(email,otp)
+   // Step 8: Send a success response to the client
   res.status(200).json({
 message:"OTP sent sucessfully"
   })
 }
+
+ // Step 9: Handle unexpected errors
 catch(error){
   res.status(500).json({
     message:"Error",
-    errMessage:error.message
+    errMessage:error.message     // Include the actual error message 
   })
  }
   }
@@ -123,7 +135,7 @@ catch(error){
    try{
     const{otp,newPassword}=req.body
     if(!otp||!newPassword){
-     return res.status(400).json({
+      res.status(400).json({
         message:"please provide otp,newPassword"
       })
     }
@@ -151,3 +163,5 @@ catch(error){
 
    
   }
+
+  
