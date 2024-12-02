@@ -2,7 +2,14 @@ const Bike = require("../../../model/bikemodel")
 
 exports.addbike=async(req,res)=>{
     const{name,brand,description,category,price}=req.body     //req.body contains data sent by the client in the request.
-   if(!name||!brand||!category||!price){      //This checks if the required fields (name, brand, category, price) are provided.
+   let filename;
+   if(!req.file){
+    filename="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSgIoUwTqj-Xs46Yabml_W4V40Hjj13NASCDQ&s"
+   }else{
+    filename=req.file.filename
+   }
+
+    if(!name||!brand||!category||!price){      //This checks if the required fields (name, brand, category, price) are provided.
         return res.status(400).json({
             message:"please provide name ,brand,price,category,description"
         })
@@ -14,7 +21,8 @@ exports.addbike=async(req,res)=>{
             brand,
             description,
             category,
-            price
+            price,
+            image:filename
         })
         res.status(200).json({
             message:"bike rented sucessfully"
@@ -38,7 +46,7 @@ exports.getBike=async(req,res)=>{
     const data=await Bike.findById(id)
     res.status(200).json({
         message:"Bike fetched sucessfully",
-        data
+        data:data
     })
 }
 

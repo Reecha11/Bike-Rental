@@ -80,9 +80,7 @@ catch(error){
    }
   }
 
-  exports.loginUser=async(req,res)=>{
 
-  }
   exports.forgetPassword =async(req,res)=>{
 
 try{

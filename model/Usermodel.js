@@ -16,6 +16,11 @@ const userSchema =new Schema({
     },
     otp:{
         type:Number
+    },
+    role:{
+        type:String,
+        enum: ['admin','provider','customer'],
+        default:'customer'
     }
 })
 const User = mongoose.model("User",userSchema)   //table banako user vanney ani column (userSchema) sanga connect garako
