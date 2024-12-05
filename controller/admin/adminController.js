@@ -17,3 +17,10 @@ exports.deleteUser=async(req,res)=>{
     })
 
 }
+exports.getAllProviderlist =async (req,res)=>{
+    const data=await provider.find()
+    res.status(202).json({
+        message:"provider fetched sucessfully",
+        data
+    })
+}
